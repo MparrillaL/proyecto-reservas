@@ -1,74 +1,54 @@
 # Plataforma de Reservas — Actividades Culturales de Sevilla
+Documentación de despliegue para una plataforma de reservas de talleres, visitas
+y eventos culturales en Sevilla.
 
-Aplicación web contenerizada para gestionar reservas de **talleres, visitas y eventos**
-de una empresa cultural de Sevilla.
-
-> **Actividad:** DAW · UD01 · AEE RA1 — Implanta arquitecturas web analizando y aplicando criterios de funcionalidad.
-> **Autor:** Manuel Parrilla Lahoz
-> **Rol asumido:** equipo de despliegue.
-> **Fecha:** 2026-09-30
-
----
-
-## 📑 Índice
-
-1. [Descripción del proyecto](#1-descripción-del-proyecto)
-2. [Arquitectura](#2-arquitectura)
-3. [Estructura del repositorio](#3-estructura-del-repositorio)
-4. [Requisitos previos](#4-requisitos-previos)
+| Actividad | DAW · UD01 · AEE RA1 |
+|---|---|
+| Autor | Manuel Parrilla Lahoz |
+| Rol | Equipo de despliegue |
+| Estado documentado | 2026-10-01 |
 
 ---
 
-## 1. Descripción del proyecto
+## Índice
 
-El equipo de desarrollo ha entregado una **API**, una **interfaz web** y un
-**esquema de base de datos**. El equipo de despliegue (en este caso yo) debe convertir
-ese software en un **servicio operativo, mantenible y documentado** ejecutable
-en Docker Desktop con un único comando:
+1. [Estado del proyecto](#1-estado-del-proyecto)
+2. [Inventario del repositorio](#2-inventario-del-repositorio)
+3. [Arquitectura propuesta](#3-arquitectura-propuesta)
+4. [Evidencias y limitaciones](#4-evidencias-y-limitaciones)
+5. [Requisitos para completar el despliegue](#5-requisitos-para-completar-el-despliegue)
 
-```bash
-docker compose up --build
-```
+---
 
-## 2. Arquitectura
+## 1. Estado del proyecto
 
-### Diagrama de arquitectura
-![Diagrama de arquitectura](docs/image.png)
+El escenario de la actividad indica que el equipo de desarrollo entrega una API,
+una interfaz web y un esquema de base de datos. Sin embargo, esos componentes **no
+estaban incluidos entre los archivos recibidos**. En consecuencia, todavía no es
+posible desplegar ni probar la aplicación de ese equipo.
 
-### Explicación
+El diagrama de este documento representa una **arquitectura propuesta**, no una
+solución ya implementada. No se afirma que la API, el frontend o la base de datos
+estén disponibles o en funcionamiento.
 
-El sistema sigue una arquitectura **cliente–servidor en tres capas**,
-completamente contenerizada. El **único punto de entrada** es **Nginx**, que
-actúa como *reverse proxy* y servidor de contenido estático.
+## 2. Inventario del repositorio
 
-Los tres servicios se ejecutan en **contenedores independientes** y se
-comunican a través de una **red interna de Docker** (`reservas-network`):
+| Elemento | Estado |
+|---|---|
+| `README.md` | Documentación del proyecto |
+| `compose.yaml` | Existe, pero está vacío |
+| `docs/image.png` | Diagrama de arquitectura propuesta |
+| `.env.example` | Plantilla provisional de variables MySQL; no contiene credenciales reales |
+| `.gitignore` | Excluye `.env` y otros archivos locales de entorno |
+| `.dockerignore` | Excluye Git, archivos de entorno y dependencias locales del contexto Docker |
+| API, frontend, Dockerfiles, configuración de Nginx, esquema SQL y pruebas | No están presentes |
 
-| Capa | Contenedor | Función | Puerto host |
-|------|-----------|---------|-------------|
-| Presentación | **Nginx** | Sirve el frontend y redirige `/api/*` a la API | `80` |
-| Lógica | **API** | Expone los endpoints REST de reservas | —  |
-| Datos | **MySQL** | Almacena los datos sobre un volumen persistente | —  |
-
-**Claves del diseño:**
-
-- Solo Nginx publica un puerto hacia el host → **mínima superficie de ataque**.
-- La base de datos **no es accesible desde fuera** del entorno Docker.
-- Los datos persisten en el **volumen nombrado `mysql_data`**, por lo que
-  sobreviven a la recreación del contenedor de MySQL.
-
-## 3. Estructura del repositorio
+La estructura disponible actualmente es:
 
 ```text
 proyecto-reservas/
-├── api/
-│   └── src/
-├── db/
-│   └── init/
 ├── docs/
 │   └── image.png
-├── ngix/
-├── tests/
 ├── .dockerignore
 ├── .env.example
 ├── .gitignore
@@ -76,20 +56,46 @@ proyecto-reservas/
 └── README.md
 ```
 
-## 4. Requisitos previos
+## 3. Arquitectura propuesta
 
-Antes de desplegar la solución, el equipo que la reciba debe disponer del
-siguiente software y cumplir una serie de condiciones mínimas en el entorno.
+![Diagrama de arquitectura propuesta, pendiente de implementación](docs/image.png)
 
-### Software necesario
+El diseño previsto consta de tres capas: Nginx sería el único punto de entrada
+HTTP; la API se ejecutaría en un contenedor independiente; y MySQL almacenaría los
+datos en un volumen nombrado. Los servicios se comunicarían mediante una red de
+Docker.
 
-| Herramienta | Versión mínima | Comando de comprobación |
-|-------------|----------------|-------------------------|
-| **Docker Desktop** | 4.x (con Compose v2) | `docker --version` |
-| **Docker Compose** | v2.x | `docker compose version` |
-| **Git** | 2.x | `git --version` |
-| **curl** | cualquiera reciente | `curl --version` |
+## 4. Evidencias y limitaciones
 
-> En Windows se recomienda trabajar dentro de **WSL 2** para evitar problemas
-> de rutas y permisos con los volúmenes de Docker.
+| Evidencia solicitada | Estado | Motivo o siguiente acción |
+|---|---|---|
+| Diagrama de arquitectura | Disponible como propuesta | Revisarlo si cambian las decisiones técnicas |
+| Repositorio Git con todos los componentes | Parcial | Faltan API, frontend, esquema SQL, Dockerfiles y configuración |
+| Validación con `docker compose config` | Pendiente | Actualmente devuelve `empty compose file`: `compose.yaml` está vacío |
+| Dockerfile seguro para la API | Pendiente | Se necesita el código y conocer su entorno de ejecución |
+| Estado de servicios y logs | Pendiente | No hay servicios definidos que puedan arrancarse |
+| Pruebas HTTP de la aplicación | Pendiente | No hay una aplicación HTTP disponible para probar |
+| Prueba integrada de persistencia | Pendiente | No hay una base de datos configurada ni un esquema SQL |
+| README técnico de ejecución | Parcial | Las instrucciones se completarán cuando exista una solución ejecutable |
+| Defensa del diseño | Parcial | Se pueden justificar las decisiones propuestas, no presentar resultados de ejecución |
+
+Las capturas del diagrama no deben presentarse como prueba de que los contenedores
+funcionan. Cuando estén disponibles los componentes, las evidencias deberán mostrar
+los comandos ejecutados y sus resultados: validación de Compose, servicios activos,
+logs, respuesta HTTP y recuperación de los datos tras recrear el contenedor,
+conservando el volumen.
+
+## 5. Requisitos para completar el despliegue
+
+Cuando se reciban los componentes, el equipo deberá disponer de Docker Desktop con
+Compose v2, Git y un cliente HTTP, como `curl`.
+
+El objetivo de arranque es:
+
+```powershell
+docker compose up --build
+```
+
+Este comando es un requisito de la entrega, **no está validado en el estado actual**.
+
 
