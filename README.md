@@ -16,13 +16,6 @@ de una empresa cultural de Sevilla.
 2. [Arquitectura](#2-arquitectura)
 3. [Estructura del repositorio](#3-estructura-del-repositorio)
 4. [Requisitos previos](#4-requisitos-previos)
-5. [Instalación y arranque](#5-instalación-y-arranque)
-6. [Uso](#6-uso)
-7. [Pruebas](#7-pruebas)
-8. [Persistencia de datos](#8-persistencia-de-datos)
-9. [Diagnóstico y logs](#9-diagnóstico-y-logs)
-10. [Parada y limpieza](#10-parada-y-limpieza)
-11. [Decisiones de diseño y seguridad](#11-decisiones-de-diseño-y-seguridad)
 
 ---
 
@@ -35,11 +28,12 @@ en Docker Desktop con un único comando:
 
 ```bash
 docker compose up --build
+```
 
 ## 2. Arquitectura
 
 ### Diagrama de arquitectura
-![Diagrama de arquitectura](image.png)
+![Diagrama de arquitectura](docs/image.png)
 
 ### Explicación
 
@@ -65,25 +59,22 @@ comunican a través de una **red interna de Docker** (`reservas-network`):
 
 ## 3. Estructura del repositorio
 
+```text
 proyecto-reservas/
-├── api/ # Código de la API (contenedor independiente)
-│ ├── src/ # Código fuente de la aplicación
-│ ├── Dockerfile # Imagen de la API
-│ └── .dockerignore # Exclusiones del contexto de build
+├── api/
+│   └── src/
 ├── db/
-│ └── init/ # Scripts SQL de inicialización
-│ └── 01-schema.sql
-├── docs/ # Documentación adicional (diagramas, capturas)
-├── nginx/
-│ ├── Dockerfile # Imagen de Nginx + SPA
-│ └── default.conf # Configuración del reverse proxy
+│   └── init/
+├── docs/
+│   └── image.png
+├── ngix/
 ├── tests/
-│ └── smoke.sh # Pruebas de humo (HTTP + endpoints)
-├── .dockerignore # Exclusiones globales del contexto de build
-├── .env.example # Plantilla de variables de entorno (SÍ va a Git)
-├── .gitignore # Ignora .env y artefactos locales
-├── compose.yaml # Orquestación de los servicios
-└── README.md # Este documento
+├── .dockerignore
+├── .env.example
+├── .gitignore
+├── compose.yaml
+└── README.md
+```
 
 ## 4. Requisitos previos
 
